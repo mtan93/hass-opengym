@@ -1,0 +1,22 @@
+    <!-- Home Assistant add-on: Ingress serves openGym under /api/hassio_ingress/<token>/, so the
+         app's root-relative "/api/..." calls would land on Home Assistant instead of on openGym.
+         Rewrite them onto the page's own base path. Assets, media and routing already work,
+         because the frontend is built with a relative base and uses a HashRouter.
+         No-op when openGym is reached directly on its own port (base path "/"). -->
+    <script>
+      (function () {
+        var base = location.pathname.replace(/[^/]*$/, '')
+        if (base === '/') return
+        var rewrite = function (u) {
+          return (typeof u === 'string' && u.charAt(0) === '/' && u.charAt(1) !== '/') ? base + u.slice(1) : u
+        }
+        var nativeFetch = window.fetch
+        window.fetch = function (input, init) {
+          return nativeFetch.call(this, typeof input === 'string' ? rewrite(input) : input, init)
+        }
+        if (navigator.sendBeacon) {
+          var nativeBeacon = navigator.sendBeacon.bind(navigator)
+          navigator.sendBeacon = function (url, data) { return nativeBeacon(rewrite(url), data) }
+        }
+      })()
+    </script>

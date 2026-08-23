@@ -1,0 +1,9 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Serves the built app and proxies /api to the openGym API, on the Ingress port
+# and — when it is mapped — on the direct port.
+# ==============================================================================
+bashio::log.info "Starting nginx..."
+
+exec nginx -g "daemon off;"

@@ -1,0 +1,56 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# Turns the add-on options into the environment openGym's API expects, and
+# writes them where the api service picks them up.
+#
+# Options are read straight out of /data/options.json: every value here is
+# optional or has a schema default, and jq gives one predictable answer for
+# "not set" instead of several.
+# ==============================================================================
+set -e
+
+declare -r OPTIONS=/data/options.json
+declare origins rp_id rp_name admin_uids session_days invite_only
+
+opt() { jq -r "${1}" "${OPTIONS}"; }
+
+# TZ is already in the environment: the Supervisor passes Home Assistant's timezone
+# into every add-on container.
+
+bashio::log.level "$(opt '.log_level // "info"')"
+
+# Trailing slashes would never match a browser-reported origin.
+origins=$(opt '(.origins // []) | map(sub("/+$"; "")) | join(",")')
+rp_id=$(opt '.rp_id // ""')
+rp_name=$(opt '.rp_name // "openGym"')
+admin_uids=$(opt '.admin_uids // ""')
+session_days=$(opt '.session_days // 90')
+invite_only=$(opt 'if .invite_only then 1 else 0 end')
+
+# A passkey is bound to its RP ID: the bare hostname of the origin it was created on.
+if [[ -z "${rp_id}" && -n "${origins}" ]]; then
+    rp_id="${origins%%,*}"      # first origin
+    rp_id="${rp_id#*://}"       # strip scheme
+    rp_id="${rp_id%%/*}"        # strip path
+    rp_id="${rp_id%%:*}"        # strip port
+fi
+
+{
+    printf 'export DATA_DIR=%q\n'     "/data"
+    printf 'export PORT=%q\n'         "3000"
+    printf 'export ORIGIN=%q\n'       "${origins}"
+    printf 'export RP_ID=%q\n'        "${rp_id}"
+    printf 'export RP_NAME=%q\n'      "${rp_name}"
+    printf 'export ADMIN_UIDS=%q\n'   "${admin_uids}"
+    printf 'export SESSION_DAYS=%q\n' "${session_days}"
+    printf 'export INVITE_ONLY=%q\n'  "${invite_only}"
+} > /var/run/opengym.env
+
+if [[ -n "${origins}" ]]; then
+    bashio::log.info "Passkeys are pinned to: ${origins} (RP ID: ${rp_id})"
+else
+    bashio::log.info "Passkeys follow whichever address you open openGym on."
+    bashio::log.info "Set the 'origins' option if Home Assistant sits behind another reverse proxy."
+fi
+bashio::log.info "Passkeys need a secure context: reach Home Assistant over HTTPS (or localhost)."

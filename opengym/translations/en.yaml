@@ -1,0 +1,36 @@
+---
+configuration:
+  origins:
+    name: Origins
+    description: >-
+      Leave empty and openGym accepts passkeys for whichever address you opened it
+      on. Fill it in only if Home Assistant sits behind another reverse proxy, in
+      which case list the exact URLs you use, e.g. https://home.example.com.
+  rp_id:
+    name: Passkey domain (RP ID)
+    description: >-
+      The bare hostname a passkey is bound to, e.g. home.example.com. Leave empty
+      to derive it from the address in use. Changing it invalidates existing passkeys.
+  rp_name:
+    name: Passkey prompt name
+    description: The name shown by your device when it asks to save or use a passkey.
+  invite_only:
+    name: Invite only
+    description: >-
+      Require an invite code to create a profile. Codes are generated from the
+      Admin screen inside openGym.
+  admin_uids:
+    name: Admin user IDs
+    description: >-
+      Comma-separated openGym user IDs that get the Admin screen. The first profile
+      you create is easiest to find under Settings.
+  session_days:
+    name: Stay signed in (days)
+    description: How long a sign-in lasts before a passkey is needed again.
+  log_level:
+    name: Log level
+    description: Verbosity of the add-on log.
+network:
+  8080/tcp: >-
+    Direct web access outside Ingress. Only needed to install openGym as a PWA
+    or to reach it on its own hostname.

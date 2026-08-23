@@ -1,0 +1,13 @@
+#!/command/with-contenv bashio
+# shellcheck shell=bash
+# ==============================================================================
+# openGym's API: passkey auth, per-user state and push notifications.
+# Everything it writes lives in /data, so it survives add-on updates.
+# ==============================================================================
+# shellcheck source=/dev/null
+source /var/run/opengym.env
+
+bashio::log.info "Starting the openGym API..."
+
+cd /opt/opengym/api || bashio::exit.nok "openGym API is missing from the image"
+exec node server.js
