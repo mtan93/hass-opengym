@@ -26,12 +26,10 @@ jobs:
         include:
           # Native runners on purpose: cross-building the frontend under QEMU
           # corrupts esbuild/rollup's platform binaries and breaks `vite build`.
-          - arch: amd64
-            runner: ubuntu-24.04
-            base: ghcr.io/home-assistant/amd64-base:3.21
           - arch: aarch64
             runner: ubuntu-24.04-arm
-            base: ghcr.io/home-assistant/aarch64-base:3.21
+          - arch: amd64
+            runner: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -39,12 +37,8 @@ jobs:
         id: meta
         run: |
           version=$(grep -m1 '^version:' opengym/config.yaml | tr -d '"' | awk '{print $2}')
-          ref=$(grep -m1 'OPENGYM_REF:' opengym/build.yaml | awk '{print $2}')
-          repo=$(grep -m1 'OPENGYM_REPO:' opengym/build.yaml | awk '{print $2}')
           {
             echo "version=${version}"
-            echo "opengym_ref=${ref}"
-            echo "opengym_repo=${repo}"
             echo "image=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/hass-opengym-${{ matrix.arch }}"
           } >> "${GITHUB_OUTPUT}"
 
@@ -65,15 +59,14 @@ jobs:
           tags: |
             ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.version }}
             ${{ steps.meta.outputs.image }}:latest
+          # BUILD_FROM is left at the Dockerfile default (the multi-arch Home
+          # Assistant base); everything else mirrors what the Supervisor passes.
           build-args: |
-            BUILD_FROM=${{ matrix.base }}
             BUILD_ARCH=${{ matrix.arch }}
             BUILD_NAME=openGym
             BUILD_DESCRIPTION=Self-hosted workout planner and gym logger
             BUILD_VERSION=${{ steps.meta.outputs.version }}
             BUILD_REPOSITORY=${{ github.repository }}
             BUILD_REF=${{ github.sha }}
-            OPENGYM_REPO=${{ steps.meta.outputs.opengym_repo }}
-            OPENGYM_REF=${{ steps.meta.outputs.opengym_ref }}
           cache-from: type=gha,scope=${{ matrix.arch }}
           cache-to: type=gha,mode=max,scope=${{ matrix.arch }}

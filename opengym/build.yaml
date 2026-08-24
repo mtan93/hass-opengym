@@ -1,9 +1,0 @@
----
-build_from:
-  aarch64: ghcr.io/home-assistant/aarch64-base:3.21
-  amd64: ghcr.io/home-assistant/amd64-base:3.21
-args:
-  OPENGYM_REPO: arvids-unavailable/openGym
-  # Pin the upstream commit the add-on is built from. Bump this (and the add-on
-  # version in config.yaml) to pull in newer openGym releases.
-  OPENGYM_REF: c42ba6b98e3776af5981f20c05ba392238799670

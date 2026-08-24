@@ -1,4 +1,7 @@
-ARG BUILD_FROM
+# Home Assistant only passes BUILD_FROM when a (deprecated) build.yaml is present, so the
+# base image is pinned here. It is a multi-arch index and buildx --platform picks the
+# matching variant, which is why there is no per-architecture mapping any more.
+ARG BUILD_FROM="ghcr.io/home-assistant/base:3.21"
 
 # ---------------------------------------------------------------------------
 # Stage 1 — fetch openGym, adapt it for Home Assistant, build the frontend.
@@ -10,7 +13,7 @@ ARG BUILD_FROM
 FROM node:22-alpine AS build
 
 ARG OPENGYM_REPO=arvids-unavailable/openGym
-ARG OPENGYM_REF=main
+ARG OPENGYM_REF=c42ba6b98e3776af5981f20c05ba392238799670
 
 WORKDIR /src
 

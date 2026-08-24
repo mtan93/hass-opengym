@@ -17,9 +17,8 @@ next to everything else.
 
 3. Find **openGym** in the store and click **Install**.
 
-   The first install builds the app on your Home Assistant machine and takes several
-   minutes — it fetches the openGym source and compiles the frontend. See
-   [Prebuilt images](#prebuilt-images) to skip that.
+   This downloads a prebuilt image, so it takes about as long as any other add-on —
+   nothing is compiled on your Home Assistant machine.
 
 4. Click **Start**, then **Open Web UI**.
 
@@ -44,18 +43,27 @@ URL under the `origins` option.
 
 Full option-by-option notes are in [the add-on documentation](opengym/DOCS.md).
 
-## Prebuilt images
+## How the image is built
 
-`.github/workflows/build.yaml` builds and publishes an image per architecture to GHCR on
-every push. Once it has run successfully, uncomment the `image:` line in
-[`opengym/config.yaml`](opengym/config.yaml) and installs become a download instead of a
-build. Make the two GHCR packages public first, or Home Assistant can't pull them.
+`.github/workflows/build.yaml` builds one image per architecture on a native runner and
+pushes it to GHCR, tagged with the add-on version. `image:` in
+[`opengym/config.yaml`](opengym/config.yaml) points Home Assistant at those, so installing
+is a pull.
+
+Building on the Home Assistant machine instead — by removing the `image:` line — works but
+is not recommended: it downloads the openGym source and runs a Vite build, which is enough
+to get killed for running out of memory on a small box.
+
+Both GHCR packages must be **public**, or Home Assistant gets a 403 on install.
 
 ## Updating openGym
 
-Bump `OPENGYM_REF` in [`opengym/build.yaml`](opengym/build.yaml) to the upstream commit you
-want, bump `version` in [`opengym/config.yaml`](opengym/config.yaml), and Home Assistant
-will offer the update.
+1. Bump `OPENGYM_REF` in [`opengym/Dockerfile`](opengym/Dockerfile) to the upstream commit
+   you want.
+2. Bump `version` in [`opengym/config.yaml`](opengym/config.yaml).
+3. Push. CI publishes an image tagged with the new version, and Home Assistant offers the
+   update — in that order, because Home Assistant pulls `<image>:<version>` and will fail
+   if the tag doesn't exist yet.
 
 ## License
 

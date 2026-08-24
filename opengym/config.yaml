@@ -9,9 +9,9 @@ url: https://github.com/mtan93/hass-opengym/tree/main/opengym
 arch:
   - aarch64
   - amd64
-# Uncomment once .github/workflows/build.yaml has published the images and both GHCR
-# packages are public — installs then pull a prebuilt image instead of building locally.
-# image: ghcr.io/mtan93/hass-opengym-{arch}
+# Published by .github/workflows/build.yaml. Home Assistant pulls
+# <image>:<version>, so every version below must exist as a tag.
+image: ghcr.io/mtan93/hass-opengym-{arch}
 init: false
 startup: application
 boot: auto

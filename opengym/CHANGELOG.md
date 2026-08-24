@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Install from the prebuilt image published to GHCR instead of building openGym on
+  the Home Assistant machine, where the frontend build could be killed for running
+  out of memory.
+- Dropped the deprecated `build.yaml`; the base image is pinned in the `Dockerfile`
+  and buildx picks the right architecture from the multi-arch index.
+
 ## 1.2.4
 
 Initial release: openGym 1.2.4 packaged as a Home Assistant add-on.

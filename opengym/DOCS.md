@@ -92,8 +92,9 @@ sessions and notifications may stop working until you reopen the app.
 
 ## Updating openGym itself
 
-The add-on pins an upstream commit (`OPENGYM_REF` in `build.yaml`). To move to a newer
-openGym, bump that value and the add-on `version`, then reinstall or update the add-on.
+The add-on pins an upstream commit (`OPENGYM_REF` in the `Dockerfile`) and runs from a
+prebuilt image. To move to a newer openGym, bump that value and the add-on `version`, let
+CI publish the new image, then update the add-on.
 
 ## Troubleshooting
 
@@ -106,3 +107,8 @@ crashed, the add-on halts on purpose rather than serving a broken app.
 
 **Exercise images don't load.** They're baked into the image; a missing image means the
 build was interrupted. Rebuild the add-on.
+
+**Install fails with no useful error.** If the add-on is set to build locally rather than
+pull a prebuilt image, the Vite build can be killed for running out of memory on smaller
+hardware, which surfaces as a bare "can't build" with nothing in the log. Use the published
+image (the default) rather than building on the Home Assistant machine.
